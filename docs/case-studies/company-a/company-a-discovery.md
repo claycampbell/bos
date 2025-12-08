@@ -2,6 +2,13 @@
 
 **Status**: In Progress
 **Phase**: Month 1 - Discovery and Initial Architecture
+**Source Repository**: https://github.com/claycampbell/blueprint
+
+---
+
+## Reference
+
+All detailed information about Company A's architecture, business model, and transformation is maintained in the [blueprint repository](https://github.com/claycampbell/blueprint). This document extracts Phoenix-relevant learnings from that engagement.
 
 ---
 

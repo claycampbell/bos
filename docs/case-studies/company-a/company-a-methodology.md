@@ -1,6 +1,13 @@
 # Company A: Consulting Methodology
 
 **Purpose**: Document the actual methodology being used so Phoenix can codify it
+**Source Repository**: https://github.com/claycampbell/blueprint
+
+---
+
+## Reference
+
+All project-specific details (architecture, requirements, designs) are maintained in the [blueprint repository](https://github.com/claycampbell/blueprint). This document focuses on extracting the consulting methodology patterns for Phoenix development.
 
 ---
 
