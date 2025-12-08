@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /B /S *.* 2)",
+      "Bash(nul)",
+      "Bash(findstr:*)",
+      "Bash(more:*)",
+      "Bash(dir /B)",
+      "Bash(python3:*)",
+      "Bash(python:*)",
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nAdd The Sentinel agent for critical validation\n\n- Renamed from \"Munger Mind Agent\" to \"The Sentinel\"\n- Advisory/parallel stream mode: non-blocking but highly visible\n- Applies mental models: inversion, incentive analysis, bias detection\n- Added docs/agents/ directory with agent specifications\n- Copied mental models prompt as sentinel-prompt.md for reference\n\nThe Sentinel runs continuously alongside transformation process,\nproviding red team perspective and challenging assumptions without\nblocking progress. Consultants can query anytime.\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

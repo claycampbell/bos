@@ -168,6 +168,24 @@ Transformation initiatives are explicit nodes in the graph:
 - **Proposes**: Refinements, optimizations, course corrections
 - **Closes**: Feedback loop from operations → strategy
 
+**The Sentinel** (Critical Validation & Bias Detection)
+- **Role**: Advisory/parallel stream - continuous red team perspective
+- **Mode**: Non-blocking but highly visible, always running in background
+- **Applies**: Charlie Munger's latticework of mental models to validate decisions
+- **Core Functions**:
+  - **Inversion**: "How would this transformation fail catastrophically?"
+  - **Incentive Analysis**: "What behaviors are we actually rewarding?"
+  - **Circle of Competence**: "Are we solving 'too hard' problems?"
+  - **Bias Detection**: Identifies cognitive biases in proposals (confirmation bias, social proof, commitment tendency)
+  - **Lollapalooza Effects**: Spots where multiple factors compound (positive or negative)
+- **Interaction Pattern**:
+  - Consultants and leadership query anytime: "Sentinel, what are we missing?"
+  - Proactively surfaces insights when detecting dangerous patterns
+  - Reviews agent proposals in workspace, flags concerns
+  - Does not block promotion but provides critical perspective
+- **Output**: Blunt, concise analysis with specific mental models applied
+- **Value**: Prevents groupthink, challenges assumptions, identifies perverse incentives before they cause harm
+
 ### Operations Agents (Business Execution)
 
 **Purpose**: Actually run day-to-day business processes

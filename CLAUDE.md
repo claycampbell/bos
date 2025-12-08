@@ -49,6 +49,7 @@ Following Anthropic's harness pattern for production-grade long-running agents:
 - **Performance Agent**: Monitors KPIs, generates insights (Adaptive Performance)
 - **Governance Agent**: Ensures compliance, monitors for bias/drift (Safety & Compliance)
 - **Learning Agent**: Analyzes outcomes, proposes improvements (Continuous Improvement)
+- **The Sentinel**: Critical validator applying mental models (inversion, incentive analysis, bias detection) - non-blocking advisory perspective
 
 **Operations Agents (Business Execution)**:
 - Function-specific agents that run day-to-day business processes
