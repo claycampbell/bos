@@ -579,12 +579,105 @@ Following Anthropic's harness pattern for production-grade long-running agents.
 
 ---
 
+---
+
+## Section 9: Development Approach - Build Phoenix from Real Engagements
+
+### Philosophy: Technology Solves Problems, Not Creates Them
+
+Phoenix must be built from actual transformation work, not from theoretical ideals. We are **not** building technology and then finding problems to apply it to. Instead, we are:
+
+1. **Doing the work manually first** with real clients
+2. **Documenting what actually works** (and what doesn't)
+3. **Identifying patterns** that can be codified
+4. **Building agents to accelerate** proven methodologies
+5. **Validating with real outcomes** before generalizing
+
+### Case Study-Driven Development
+
+**Active Reference Implementation: Company A**
+
+Phoenix development is running in parallel with an active 6-month transformation engagement:
+
+**The Problem**:
+- Growing company with proven business model (25% annual growth)
+- Can't scale to national footprint due to operational constraints
+- Previous consultant proposed $1M+ tech modernization (lift-and-shift approach)
+- Real opportunity: Transform from service provider to platform/SaaS franchise business
+
+**The Engagement**:
+- Parallel strategy + dev teams working in lock-step
+- Initial architecture built from As-Is understanding
+- Strategy evolves → dev adapts architecture iteratively
+- Discovering what needs to be built vs. what can be configured
+- Capturing where AI agents could accelerate vs. where human judgment is essential
+
+**What We're Learning**:
+- Discovery questions that reveal business model transformation opportunities
+- How strategy-to-dev handoff actually works in practice
+- What architectural decisions can be made early vs. what must wait
+- Where consultants spend time (and what could be automated)
+- Patterns that can become templates for future engagements
+
+**Documentation**: See [docs/case-studies/company-a/](../case-studies/company-a/) for real-time capture of:
+- Discovery process and insights
+- Methodology and decision frameworks
+- Architecture evolution
+- Phoenix learning objectives and findings
+
+### Parallel Track Approach
+
+**Company A Engagement** (Real work, real client, real outcomes)
+↓ Informs
+**Phoenix Development** (Codify proven patterns)
+↓ Enables
+**Future Engagements** (Faster, more consistent, scalable)
+
+### What This Means for Phoenix Build Sequence
+
+1. **Don't build agents before understanding the work**
+   - Document what human consultants actually do
+   - Identify repeated patterns vs. unique judgment calls
+   - Validate economic value of automation
+
+2. **Start with templates from real architectures**
+   - Company A's platform architecture becomes a template
+   - Their As-Is → To-Be transformation becomes a reference case
+   - Patterns that emerge become reusable components
+
+3. **Build harness infrastructure first**
+   - Agents need observability, safety, state management
+   - These are foundational regardless of agent specifics
+   - Can be built while methodology is being documented
+
+4. **Iterate with real feedback**
+   - Test agent capabilities on Company A data
+   - Validate that agent proposals match consultant insights
+   - Measure actual time savings and quality improvements
+
+### Success Criteria for Phoenix v1.0
+
+Phoenix v1.0 is ready when:
+- [ ] Successfully used to accelerate a real engagement (like Company A)
+- [ ] Consultants report it saves time without compromising quality
+- [ ] Discovery agents ask questions that yield strategic insights
+- [ ] Transformation proposals from agents are considered valuable by clients
+- [ ] Architecture patterns from templates adapt appropriately to new contexts
+- [ ] Economic model shows clear ROI for both consultant and client
+
+---
+
 ## Conclusion
 
-Project Phoenix transforms organizations through a three-phase lifecycle: Understanding, Reinventing, and Running. The platform uses a graph database to model organizations, AI agents operating through harnesses to analyze and propose improvements, and human consultants to facilitate and govern changes. The combination of AI exploration (workspace graphs) and human governance (core graph promotion) enables bold reimagination with organizational safety. The result: companies evolve into AI-native enterprises that continuously learn, adapt, and optimize.
+Project Phoenix transforms organizations through a three-phase lifecycle: Understanding, Reinventing, and Running. The platform uses a graph database to model organizations, AI agents operating through harnesses to analyze and propose improvements, and human consultants to facilitate and govern changes. The combination of AI exploration (workspace graphs) and human governance (core graph promotion) enables bold reimagination with organizational safety.
+
+**Critically**: Phoenix is being built from real transformation work, not from theoretical ideals. Active engagements like Company A inform every design decision, ensuring Phoenix solves actual problems rather than creating technology looking for a problem.
+
+The result: companies evolve into AI-native enterprises that continuously learn, adapt, and optimize - with a proven methodology and platform to guide the transformation.
 
 **Next Steps**:
-1. Technical architecture deep-dive (graph schema, agent framework selection)
-2. Phase 1 MVP scope (discovery journey design)
-3. Harness implementation patterns
-4. Initial template library for Operations Agents
+1. Continue documenting Company A engagement methodology and learnings
+2. Technical architecture deep-dive informed by real needs (graph schema, agent framework selection)
+3. Phase 1 MVP scope based on proven discovery process
+4. Harness implementation patterns for production reliability
+5. Template library extraction from Company A architecture
