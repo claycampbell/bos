@@ -117,17 +117,32 @@ Target outcomes:
 - 30% lower operational cost
 - Continuous learning cycles deployed in <30 days
 
+## Agent Design Documents
+
+Detailed agent designs are being developed in [docs/agents/](docs/agents/):
+
+**Phase 1 (Understanding)**:
+- **Discovery Agent**: [docs/agents/discovery-agent-design.md](docs/agents/discovery-agent-design.md) - Conducts stakeholder interviews, builds As-Is graph, extracts strategic insights that enable transformation
+
+**Phase 2 (Reinventing)**:
+- **Vision Agent**: [docs/agents/vision-agent-design.md](docs/agents/vision-agent-design.md) - Analyzes As-Is graph, generates transformation scenarios (efficiency → platform → new business), uses weighted signal scoring to calibrate boldness
+
+**Critical Validation**:
+- **The Sentinel**: [docs/agents/sentinel-prompt.md](docs/agents/sentinel-prompt.md) - Applies Charlie Munger mental models (inversion, incentive analysis, bias detection) to challenge assumptions and identify risks
+
 ## Development Approach
 
 When building Project Phoenix:
 1. Start with the mental model: [docs/plans/2025-12-08-phoenix-mental-model.md](docs/plans/2025-12-08-phoenix-mental-model.md)
-2. Build harness architecture first (foundational for all agents)
-3. Implement graph database schema with transformation nodes
-4. Create Phase 1 discovery agents with workspace pattern
-5. Develop template library for Operations Agents
-6. Build Phase 2 design interfaces and approval workflows
-7. Implement Phase 3 execution and monitoring capabilities
-8. Ensure continuous feedback loops from Phase 3 → Phase 1/2
+2. Review agent designs: [docs/agents/](docs/agents/) for Discovery, Vision, and Sentinel specifications
+3. Build from real engagements: [docs/case-studies/company-a/](docs/case-studies/company-a/) - validate against actual transformation work
+4. Build harness architecture first (foundational for all agents)
+5. Implement graph database schema with transformation nodes
+6. Create Phase 1 discovery agents with workspace pattern
+7. Develop template library for Operations Agents (from real transformations)
+8. Build Phase 2 design interfaces and approval workflows
+9. Implement Phase 3 execution and monitoring capabilities
+10. Ensure continuous feedback loops from Phase 3 → Phase 1/2
 
 ## Key Design Patterns
 
