@@ -1,0 +1,2347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Phoenix - Agent Feedback Session</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #7c3aed;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1f35 100%);
+            color: var(--text-primary);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            border-bottom: 2px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .progress-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .progress-step {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .progress-step:hover {
+            background: var(--bg-hover);
+            border-color: var(--primary);
+        }
+
+        .progress-step.active {
+            background: var(--primary);
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .progress-step.completed {
+            background: var(--success);
+            border-color: var(--success);
+        }
+
+        .agent-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .agent-section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .agent-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .agent-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .agent-icon {
+            font-size: 3rem;
+            line-height: 1;
+        }
+
+        .agent-title h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .agent-phase {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .demo-section {
+            margin: 2rem 0;
+        }
+
+        .demo-section h3 {
+            color: var(--accent);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .interactive-demo {
+            background: var(--bg-dark);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+        }
+
+        .chat-demo {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .chat-message {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .chat-message.agent {
+            background: rgba(37, 99, 235, 0.2);
+            border-left: 3px solid var(--primary);
+        }
+
+        .chat-message.user {
+            background: rgba(124, 58, 237, 0.2);
+            border-left: 3px solid var(--secondary);
+        }
+
+        .chat-message strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--accent);
+        }
+
+        .graph-visualization {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .graph-node {
+            background: var(--bg-card);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--primary);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .graph-node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+        }
+
+        .confidence-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .confidence-high { background: var(--success); }
+        .confidence-medium { background: var(--accent); }
+        .confidence-low { background: var(--danger); }
+
+        .feedback-section {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feedback-section h3 {
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .feedback-group {
+            margin-bottom: 2rem;
+        }
+
+        .feedback-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .rating-stars {
+            display: flex;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .star {
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: var(--text-secondary);
+        }
+
+        .star:hover,
+        .star.active {
+            color: var(--accent);
+            transform: scale(1.2);
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .checkbox-item:hover {
+            background: var(--bg-hover);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-primary);
+            border: 2px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-hover);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .scenario-comparison {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .scenario-card {
+            background: var(--bg-dark);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .scenario-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-5px);
+        }
+
+        .scenario-tag {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .tag-efficiency { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .tag-platform { background: rgba(37, 99, 235, 0.2); color: var(--primary); }
+        .tag-newbusiness { background: rgba(124, 58, 237, 0.2); color: var(--secondary); }
+
+        .mental-model {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 4px;
+        }
+
+        .mental-model strong {
+            color: var(--accent);
+        }
+
+        .summary-section {
+            text-align: center;
+            padding: 3rem 2rem;
+        }
+
+        .summary-icon {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+        }
+
+        .export-options {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+        }
+
+        .highlight-box {
+            background: rgba(245, 158, 11, 0.1);
+            border: 2px solid var(--accent);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .highlight-box h4 {
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+
+        .key-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        .feature-card {
+            background: rgba(37, 99, 235, 0.1);
+            padding: 1.5rem;
+            border-radius: 8px;
+            border: 1px solid rgba(37, 99, 235, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        /* Simulation styles */
+        .simulation-container {
+            background: var(--bg-dark);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border: 2px solid var(--primary);
+        }
+
+        .simulation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sim-btn {
+            padding: 0.5rem 1rem;
+            background: var(--primary);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .sim-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .sim-btn:disabled {
+            background: var(--bg-hover);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 0.75rem;
+            background: var(--bg-card);
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .typing-indicator {
+            display: none;
+            padding: 1rem;
+            color: var(--text-secondary);
+            font-style: italic;
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .signal-meter {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 0.5rem 0;
+        }
+
+        .signal-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin: 0.5rem 0;
+        }
+
+        .signal-label {
+            min-width: 180px;
+            font-size: 0.9rem;
+        }
+
+        .signal-progress {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-dark);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .signal-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--success));
+            transition: width 1s ease;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.5rem;
+            color: white;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+
+        .scenario-workspace {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .workspace-item {
+            background: var(--bg-card);
+            padding: 1rem;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            opacity: 0.3;
+            transition: all 0.5s ease;
+        }
+
+        .workspace-item.active {
+            opacity: 1;
+            border-color: var(--primary);
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .workspace-status {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-top: 0.5rem;
+        }
+
+        .critique-popup {
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .critique-item {
+            background: rgba(245, 158, 11, 0.1);
+            border-left: 3px solid var(--accent);
+            padding: 1rem;
+            margin: 0.5rem 0;
+            border-radius: 4px;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.5s ease;
+        }
+
+        .critique-item.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Project Phoenix - Agent Feedback Session</h1>
+            <p>Interactive walkthrough of Discovery, Vision, and Sentinel agents</p>
+        </header>
+
+        <div class="agent-card" style="margin-bottom: 2rem;">
+            <h3 style="margin-bottom: 1rem;">👤 Your Information (Optional)</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Name</label>
+                    <input type="text" id="userName" placeholder="Your name" style="width: 100%; padding: 0.75rem; background: var(--bg-dark); border: 2px solid var(--border); border-radius: 6px; color: var(--text-primary);">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Email</label>
+                    <input type="email" id="userEmail" placeholder="your.email@company.com" style="width: 100%; padding: 0.75rem; background: var(--bg-dark); border: 2px solid var(--border); border-radius: 6px; color: var(--text-primary);">
+                </div>
+                <div>
+                    <label style="display: block; margin-bottom: 0.5rem;">Role</label>
+                    <input type="text" id="userRole" placeholder="e.g., Consultant, Developer" style="width: 100%; padding: 0.75rem; background: var(--bg-dark); border: 2px solid var(--border); border-radius: 6px; color: var(--text-primary);">
+                </div>
+            </div>
+            <div id="saveStatus" style="margin-top: 1rem; padding: 0.75rem; border-radius: 6px; display: none;"></div>
+        </div>
+
+        <div class="progress-nav">
+            <div class="progress-step active" data-section="discovery">1. Discovery Agent</div>
+            <div class="progress-step" data-section="vision">2. Vision Agent</div>
+            <div class="progress-step" data-section="sentinel">3. The Sentinel</div>
+            <div class="progress-step" data-section="summary">4. Summary & Export</div>
+        </div>
+
+        <!-- Discovery Agent Section -->
+        <div id="discovery" class="agent-section active">
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">🔍</div>
+                    <div class="agent-title">
+                        <h2>Discovery Agent</h2>
+                        <p class="agent-phase">Phase 1: Understanding the Company</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>Core Purpose</h4>
+                    <p>The Discovery Agent conducts stakeholder interviews, builds the As-Is graph, and extracts strategic insights that enable transformation. Unlike traditional discovery tools, it identifies business model transformation opportunities by asking strategic questions.</p>
+                </div>
+
+                <div class="demo-section">
+                    <h3>🎮 Interactive Simulation: Adaptive Conversation Flow</h3>
+                    <div class="simulation-container">
+                        <div class="simulation-header">
+                            <h4 style="margin: 0;">Live Discovery Interview</h4>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="sim-btn" id="discoveryStartBtn" onclick="startDiscoverySimulation()">▶ Start Interview</button>
+                                <button class="sim-btn" style="background: var(--bg-hover);" onclick="resetDiscoverySimulation()">🔄 Reset</button>
+                            </div>
+                        </div>
+                        <div class="interactive-demo chat-demo" id="discoveryChat">
+                            <p style="color: var(--text-secondary); text-align: center; padding: 2rem;">
+                                Click "Start Interview" to see how the Discovery Agent conducts adaptive stakeholder interviews
+                            </p>
+                        </div>
+                        <div class="typing-indicator" id="discoveryTyping">Discovery Agent is thinking...</div>
+                        <div class="chat-input-area" id="discoveryInput" style="display: none;">
+                            <input type="text" class="chat-input" id="discoveryUserInput" placeholder="Type your response as the stakeholder...">
+                            <button class="sim-btn" onclick="sendDiscoveryMessage()">Send</button>
+                        </div>
+                    </div>
+
+                    <div class="signal-meter" id="discoverySignals" style="display: none;">
+                        <h4 style="margin-bottom: 1rem; color: var(--accent);">🎯 Transformation Signals Detected</h4>
+                        <div class="signal-bar">
+                            <span class="signal-label">External Customers</span>
+                            <div class="signal-progress">
+                                <div class="signal-fill" id="signal-customers" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="signal-bar">
+                            <span class="signal-label">Unique IP/Methodology</span>
+                            <div class="signal-progress">
+                                <div class="signal-fill" id="signal-ip" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="signal-bar">
+                            <span class="signal-label">Scalability Constraint</span>
+                            <div class="signal-progress">
+                                <div class="signal-fill" id="signal-scale" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <div class="signal-bar">
+                            <span class="signal-label">Leadership Appetite</span>
+                            <div class="signal-progress">
+                                <div class="signal-fill" id="signal-leadership" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Real-Time Graph Population</h3>
+                    <div class="graph-visualization">
+                        <div class="graph-node">
+                            <div>📊 Business Model</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">Arborist Report Analysis</div>
+                            <span class="confidence-badge confidence-high">High Confidence</span>
+                        </div>
+                        <div class="graph-node">
+                            <div>💡 Unique IP</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">Zero-Default Methodology</div>
+                            <span class="confidence-badge confidence-high">High Confidence</span>
+                        </div>
+                        <div class="graph-node">
+                            <div>👥 External Customers</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">2 Lenders (Connect 1.x)</div>
+                            <span class="confidence-badge confidence-high">Confirmed</span>
+                        </div>
+                        <div class="graph-node">
+                            <div>⚠️ Bottleneck</div>
+                            <div style="font-size: 0.9rem; margin-top: 0.5rem;">15-30 min loan creation</div>
+                            <span class="confidence-badge confidence-medium">Medium Confidence</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Four Types of Insights Generated</h3>
+                    <div class="key-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">⚙️</div>
+                            <strong>Operational Bottlenecks</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Manual data re-entry, error-prone handoffs (efficiency opportunities)</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🚧</div>
+                            <strong>Strategic Constraints</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Growth blockers, capacity limitations (scaling issues)</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">💰</div>
+                            <strong>Revenue Opportunities</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Underserved markets, repeated customer requests (growth vectors)</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🚀</div>
+                            <strong>New Business Models</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Platform transformation, commercialization potential (transformation candidates)</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback-section">
+                <h3>📝 Feedback: Discovery Agent</h3>
+
+                <div class="feedback-group">
+                    <label>How valuable is the adaptive conversation approach?</label>
+                    <div class="rating-stars" data-rating-group="discovery-conversation">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+
+                <div class="feedback-group">
+                    <label>How useful is real-time graph population with confidence tracking?</label>
+                    <div class="rating-stars" data-rating-group="discovery-graph">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+
+                <div class="feedback-group">
+                    <label>Which insight types are most valuable? (Select all that apply)</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="insight-types" value="operational">
+                            <span>Operational Bottlenecks</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="insight-types" value="strategic">
+                            <span>Strategic Constraints</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="insight-types" value="revenue">
+                            <span>Revenue Opportunities</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="insight-types" value="business-model">
+                            <span>New Business Models</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="feedback-group">
+                    <label>What concerns or questions do you have about the Discovery Agent?</label>
+                    <textarea rows="4" placeholder="Enter your feedback here..." id="discovery-concerns"></textarea>
+                </div>
+
+                <div class="feedback-group">
+                    <label>What improvements or features would make this more valuable?</label>
+                    <textarea rows="4" placeholder="Enter your suggestions here..." id="discovery-improvements"></textarea>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" disabled>← Previous</button>
+                <button class="btn btn-primary" onclick="nextSection('vision')">Next: Vision Agent →</button>
+            </div>
+        </div>
+
+        <!-- Vision Agent Section -->
+        <div id="vision" class="agent-section">
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">🔮</div>
+                    <div class="agent-title">
+                        <h2>Vision Agent</h2>
+                        <p class="agent-phase">Phase 2: Reinventing the Company</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>Core Purpose</h4>
+                    <p>The Vision Agent transforms As-Is understanding into bold To-Be transformation scenarios. It uses weighted signal scoring to calibrate boldness and prevent the "lift-and-shift" trap of just automating existing processes.</p>
+                </div>
+
+                <div class="demo-section">
+                    <h3>🎮 Interactive Simulation: Scenario Generation</h3>
+                    <div class="simulation-container">
+                        <div class="simulation-header">
+                            <h4 style="margin: 0;">Watch Vision Agent Generate Scenarios</h4>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="sim-btn" onclick="startVisionSimulation()">▶ Generate Scenarios</button>
+                                <button class="sim-btn" style="background: var(--bg-hover);" onclick="resetVisionSimulation()">🔄 Reset</button>
+                            </div>
+                        </div>
+
+                        <div class="signal-meter">
+                            <strong style="color: var(--accent);">Transformation Readiness Score</strong>
+                            <div style="margin-top: 1rem;">
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Existing external customers</span>
+                                    <span id="score-customers" style="color: var(--success);">0 points</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Unique IP/methodology</span>
+                                    <span id="score-ip" style="color: var(--success);">0 points</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Scalability constraint</span>
+                                    <span id="score-scale" style="color: var(--success);">0 points</span>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                                    <span>Leadership appetite</span>
+                                    <span id="score-leadership" style="color: var(--success);">0 points</span>
+                                </div>
+                                <hr style="margin: 1rem 0; border-color: var(--border);">
+                                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold;">
+                                    <span>Total Score</span>
+                                    <span id="total-score" style="color: var(--text-secondary);">0 / 7 threshold</span>
+                                </div>
+                                <p id="recommendation" style="margin-top: 1rem; color: var(--text-secondary); font-weight: 600;">
+                                    Awaiting signal analysis...
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="scenario-workspace" id="visionWorkspaces" style="display: none;">
+                            <div class="workspace-item" id="workspace-efficiency">
+                                <div class="feature-icon">⚙️</div>
+                                <strong>Workspace 1</strong>
+                                <div class="workspace-status">Idle</div>
+                            </div>
+                            <div class="workspace-item" id="workspace-platform">
+                                <div class="feature-icon">🚀</div>
+                                <strong>Workspace 2</strong>
+                                <div class="workspace-status">Idle</div>
+                            </div>
+                            <div class="workspace-item" id="workspace-newbiz">
+                                <div class="feature-icon">💡</div>
+                                <strong>Workspace 3</strong>
+                                <div class="workspace-status">Idle</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Multiple Transformation Scenarios</h3>
+                    <div class="scenario-comparison">
+                        <div class="scenario-card">
+                            <span class="scenario-tag tag-efficiency">Efficiency Play</span>
+                            <h4 style="margin-bottom: 1rem;">Operational Optimization</h4>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                                Automate bottlenecks, eliminate manual handoffs, integrate systems
+                            </p>
+                            <div style="font-size: 0.85rem;">
+                                <div><strong>Risk:</strong> Low</div>
+                                <div><strong>ROI Timeline:</strong> 6-18 months</div>
+                                <div><strong>Savings:</strong> $200K-$300K/year</div>
+                                <div style="margin-top: 1rem;">
+                                    <span class="confidence-badge confidence-high">High Confidence</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="scenario-card" style="border-color: var(--primary);">
+                            <span class="scenario-tag tag-platform">Platform Transformation</span>
+                            <h4 style="margin-bottom: 1rem;">Blueprint → Datapage</h4>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                                Operating company → Platform company, Connect 2.0 as commercializable SaaS
+                            </p>
+                            <div style="font-size: 0.85rem;">
+                                <div><strong>Risk:</strong> Medium-High</div>
+                                <div><strong>ROI Timeline:</strong> 2-5 years</div>
+                                <div><strong>Revenue:</strong> $2M-$5M (Year 2-3)</div>
+                                <div style="margin-top: 1rem;">
+                                    <span class="confidence-badge confidence-medium">Medium Confidence</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="scenario-card">
+                            <span class="scenario-tag tag-newbusiness">New Business Model</span>
+                            <h4 style="margin-bottom: 1rem;">Methodology Licensing</h4>
+                            <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                                Productize zero-default methodology, consulting/training revenue stream
+                            </p>
+                            <div style="font-size: 0.85rem;">
+                                <div><strong>Risk:</strong> High</div>
+                                <div><strong>ROI Timeline:</strong> 3-7 years</div>
+                                <div><strong>Revenue:</strong> $1M-$5M (Year 3-5)</div>
+                                <div style="margin-top: 1rem;">
+                                    <span class="confidence-badge confidence-low">Low-Medium Confidence</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Confidence-Banded Economic Projections</h3>
+                    <div class="interactive-demo">
+                        <div style="margin-bottom: 1rem;">
+                            <strong style="color: var(--accent);">Year 1: Foundation & Quick Wins</strong>
+                            <p style="margin-top: 0.5rem;">Cost savings: $200K-$300K (high confidence)<br>
+                            Investment: $400K-$600K (platform MVP)<br>
+                            Net: Break-even to modest loss, building foundation</p>
+                        </div>
+                        <div style="margin-bottom: 1rem;">
+                            <strong style="color: var(--accent);">Year 2-3: Platform Validation</strong>
+                            <p style="margin-top: 0.5rem;">Platform revenue: $2M-$5M (medium confidence - 5-10 customers)<br>
+                            Operating efficiency: 30% revenue growth, 10% headcount increase<br>
+                            Net: Profitability begins, business model validates</p>
+                        </div>
+                        <div>
+                            <strong style="color: var(--accent);">Year 3-5: Scale & New Business</strong>
+                            <p style="margin-top: 0.5rem;">Platform revenue: $8M-$20M (medium-high confidence)<br>
+                            Methodology licensing: $1M-$5M (low-medium confidence)<br>
+                            Net: Significant returns, transformation fully realized</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Key Innovation: Parallel Workspace Exploration</h3>
+                    <div class="key-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">🔄</div>
+                            <strong>Workspace 1</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Efficiency scenario in isolated graph workspace</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔄</div>
+                            <strong>Workspace 2</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Platform scenario with bold transformation</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🔄</div>
+                            <strong>Workspace 3</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">New business model exploration</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">⚡</div>
+                            <strong>Speed</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">~5-10 minutes for all scenarios vs 30-60 sequential</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feedback-section">
+                <h3>📝 Feedback: Vision Agent</h3>
+
+                <div class="feedback-group">
+                    <label>How valuable is the weighted signal scoring approach?</label>
+                    <div class="rating-stars" data-rating-group="vision-scoring">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+
+                <div class="feedback-group">
+                    <label>How useful are the confidence-banded economic projections?</label>
+                    <div class="rating-stars" data-rating-group="vision-economics">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+
+                <div class="feedback-group">
+                    <label>Which scenario types are most compelling? (Select all that apply)</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="scenario-types" value="efficiency">
+                            <span>Efficiency/Operational</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="scenario-types" value="platform">
+                            <span>Platform Transformation</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="scenario-types" value="newbusiness">
+                            <span>New Business Model</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="scenario-types" value="hybrid">
+                            <span>Hybrid Combinations</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="feedback-group">
+                    <label>What concerns or questions do you have about the Vision Agent?</label>
+                    <textarea rows="4" placeholder="Enter your feedback here..." id="vision-concerns"></textarea>
+                </div>
+
+                <div class="feedback-group">
+                    <label>What improvements or features would make this more valuable?</label>
+                    <textarea rows="4" placeholder="Enter your suggestions here..." id="vision-improvements"></textarea>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="previousSection('discovery')">← Previous</button>
+                <button class="btn btn-primary" onclick="nextSection('sentinel')">Next: The Sentinel →</button>
+            </div>
+        </div>
+
+        <!-- Sentinel Agent Section -->
+        <div id="sentinel" class="agent-section">
+            <div class="agent-card">
+                <div class="agent-header">
+                    <div class="agent-icon">🛡️</div>
+                    <div class="agent-title">
+                        <h2>The Sentinel</h2>
+                        <p class="agent-phase">Critical Validation - Advisory/Parallel Stream</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>Core Purpose</h4>
+                    <p>The Sentinel applies Charlie Munger mental models to challenge assumptions and identify risks in agent outputs. It runs continuously in non-blocking advisory mode, providing critical perspective without stopping progress.</p>
+                </div>
+
+                <div class="demo-section">
+                    <h3>🎮 Interactive Simulation: Real-Time Critique</h3>
+                    <div class="simulation-container">
+                        <div class="simulation-header">
+                            <h4 style="margin: 0;">Watch Sentinel Apply Mental Models</h4>
+                            <div style="display: flex; gap: 0.5rem;">
+                                <button class="sim-btn" onclick="startSentinelSimulation()">▶ Run Analysis</button>
+                                <button class="sim-btn" style="background: var(--bg-hover);" onclick="resetSentinelSimulation()">🔄 Reset</button>
+                            </div>
+                        </div>
+                        <div id="sentinelStatus" style="padding: 1rem; text-align: center; color: var(--text-secondary);">
+                            Click "Run Analysis" to see The Sentinel review a transformation scenario
+                        </div>
+                        <div class="critique-popup" id="sentinelCritiques"></div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Mental Models in Action</h3>
+
+                    <div class="mental-model">
+                        <strong>🔄 Inversion: "How does this fail catastrophically?"</strong>
+                        <div style="margin-top: 0.75rem;">
+                            <div style="font-style: italic; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                                Discovery Agent identified: "Two lenders already using Connect 1.x"
+                            </div>
+                            <div style="background: var(--bg-dark); padding: 1rem; border-radius: 4px; margin-top: 0.5rem;">
+                                <strong style="color: var(--danger);">Sentinel Critique:</strong><br>
+                                What if those two customers are satisfied with Connect 1.x and don't want to migrate? What if they're staying only because of personal relationships, not product quality? Invert the "market validation" signal: Could these be reluctant customers who'd leave if given a better alternative?
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mental-model">
+                        <strong>💰 Incentive Analysis: "Show me the incentive, show me the outcome"</strong>
+                        <div style="margin-top: 0.75rem;">
+                            <div style="font-style: italic; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                                Vision Agent proposed: "Platform transformation with $2M-$5M revenue target"
+                            </div>
+                            <div style="background: var(--bg-dark); padding: 1rem; border-radius: 4px; margin-top: 0.5rem;">
+                                <strong style="color: var(--danger);">Sentinel Critique:</strong><br>
+                                Who gets rewarded if the platform succeeds? If Blueprint operating company leadership still gets compensated on loan volume, they have zero incentive to prioritize platform customers. Are we creating incentive misalignment? Will platform team be starved of resources because operating company is more profitable short-term?
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mental-model">
+                        <strong>🎯 Circle of Competence: "Is this within their capabilities?"</strong>
+                        <div style="margin-top: 0.75rem;">
+                            <div style="font-style: italic; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                                Vision Agent proposed: "Multi-tenant SaaS architecture with 20+ customers"
+                            </div>
+                            <div style="background: var(--bg-dark); padding: 1rem; border-radius: 4px; margin-top: 0.5rem;">
+                                <strong style="color: var(--danger);">Sentinel Critique:</strong><br>
+                                Blueprint operates like a services company with bespoke workflows. Building a product company requires different DNA: standardized processes, customer success capabilities, sales/marketing expertise. Do they have anyone who's built SaaS before? Are we asking them to develop skills outside their circle of competence while still running the operating business?
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mental-model">
+                        <strong>🧠 Anchoring Bias: "Are we anchored on the first solution?"</strong>
+                        <div style="margin-top: 0.75rem;">
+                            <div style="font-style: italic; color: var(--text-secondary); margin-bottom: 0.5rem;">
+                                Discovery Agent surfaced: "15-30 min loan creation time via manual re-entry"
+                            </div>
+                            <div style="background: var(--bg-dark); padding: 1rem; border-radius: 4px; margin-top: 0.5rem;">
+                                <strong style="color: var(--danger);">Sentinel Critique:</strong><br>
+                                We're anchored on "automate the manual process" but is the process itself necessary? Why do we need to create loans in a separate system at all? Could the entire workflow be redesigned so loan data flows automatically? Are we optimizing a step that shouldn't exist?
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Operating Model: Advisory, Not Blocking</h3>
+                    <div class="key-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">👁️</div>
+                            <strong>Real-Time Monitoring</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Watches all agent outputs as they're generated</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">⚠️</div>
+                            <strong>Flag, Don't Block</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Surfaces concerns without stopping progress</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🎯</div>
+                            <strong>Highly Visible</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Critiques shown prominently in consultant interface</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🤔</div>
+                            <strong>Queryable</strong>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">Consultants can ask Sentinel to review specific decisions</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="demo-section">
+                    <h3>Core Mental Models Applied</h3>
+                    <div class="interactive-demo">
+                        <ul style="list-style: none; padding: 0;">
+                            <li style="padding: 0.75rem; margin-bottom: 0.5rem; background: var(--bg-card); border-radius: 4px;">
+                                <strong style="color: var(--accent);">Inversion:</strong> Ask "how does this fail?" to reveal unstated assumptions
+                            </li>
+                            <li style="padding: 0.75rem; margin-bottom: 0.5rem; background: var(--bg-card); border-radius: 4px;">
+                                <strong style="color: var(--accent);">Incentive Analysis:</strong> "Show me the incentive, show me the outcome"
+                            </li>
+                            <li style="padding: 0.75rem; margin-bottom: 0.5rem; background: var(--bg-card); border-radius: 4px;">
+                                <strong style="color: var(--accent);">Circle of Competence:</strong> Stay within known capabilities or acknowledge gaps
+                            </li>
+                            <li style="padding: 0.75rem; margin-bottom: 0.5rem; background: var(--bg-card); border-radius: 4px;">
+                                <strong style="color: var(--accent);">Anchoring Bias:</strong> Challenge the first solution proposed
+                            </li>
+                            <li style="padding: 0.75rem; margin-bottom: 0.5rem; background: var(--bg-card); border-radius: 4px;">
+                                <strong style="color: var(--accent);">Second-Order Effects:</strong> What happens after what happens?
+                            </li>
+                            <li style="padding: 0.75rem; margin-bottom: 0.5rem; background: var(--bg-card); border-radius: 4px;">
+                                <strong style="color: var(--accent);">Consistency Check:</strong> Are we solving problems we're creating?
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box">
+                    <h4>Why "The Sentinel" Instead of "Validator"?</h4>
+                    <p>The Sentinel doesn't validate correctness—it challenges thinking. It applies mental models to surface risks, flawed assumptions, and predictable mistakes before they become expensive problems. It's the "red team" voice ensuring we're consistently not stupid.</p>
+                </div>
+            </div>
+
+            <div class="feedback-section">
+                <h3>📝 Feedback: The Sentinel</h3>
+
+                <div class="feedback-group">
+                    <label>How valuable is the mental models approach?</label>
+                    <div class="rating-stars" data-rating-group="sentinel-models">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+
+                <div class="feedback-group">
+                    <label>Is the advisory (non-blocking) approach the right model?</label>
+                    <div class="rating-stars" data-rating-group="sentinel-advisory">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                </div>
+
+                <div class="feedback-group">
+                    <label>Which mental models are most valuable? (Select all that apply)</label>
+                    <div class="checkbox-group">
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="mental-models" value="inversion">
+                            <span>Inversion (How does this fail?)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="mental-models" value="incentives">
+                            <span>Incentive Analysis</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="mental-models" value="competence">
+                            <span>Circle of Competence</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="mental-models" value="bias">
+                            <span>Bias Detection (Anchoring, etc.)</span>
+                        </label>
+                        <label class="checkbox-item">
+                            <input type="checkbox" name="mental-models" value="second-order">
+                            <span>Second-Order Effects</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="feedback-group">
+                    <label>What concerns or questions do you have about The Sentinel?</label>
+                    <textarea rows="4" placeholder="Enter your feedback here..." id="sentinel-concerns"></textarea>
+                </div>
+
+                <div class="feedback-group">
+                    <label>What improvements or features would make this more valuable?</label>
+                    <textarea rows="4" placeholder="Enter your suggestions here..." id="sentinel-improvements"></textarea>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="previousSection('vision')">← Previous</button>
+                <button class="btn btn-primary" onclick="nextSection('summary')">Next: Summary →</button>
+            </div>
+        </div>
+
+        <!-- Summary Section -->
+        <div id="summary" class="agent-section">
+            <div class="summary-section">
+                <div class="summary-icon">✅</div>
+                <h2 style="margin-bottom: 1rem;">Feedback Session Complete</h2>
+                <p style="color: var(--text-secondary); margin-bottom: 2rem;">Thank you for reviewing the Discovery, Vision, and Sentinel agents!</p>
+
+                <div class="agent-card" style="text-align: left; margin-top: 2rem;">
+                    <h3 style="margin-bottom: 1.5rem; color: var(--accent);">Your Feedback Summary</h3>
+                    <div id="feedbackSummary" style="font-size: 0.95rem; line-height: 1.8;">
+                        <p style="color: var(--text-secondary);">Complete the feedback forms above to see your summary here.</p>
+                    </div>
+                </div>
+
+                <div class="export-options">
+                    <button class="btn btn-success" onclick="saveFeedback(true)">💾 Save to Cloud</button>
+                    <button class="btn btn-success" onclick="exportFeedback('json')">📥 Export as JSON</button>
+                    <button class="btn btn-success" onclick="exportFeedback('text')">📄 Export as Text</button>
+                    <button class="btn btn-primary" onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 3rem; text-align: left;">
+                    <h4>Next Steps</h4>
+                    <ul style="margin-top: 1rem; margin-left: 1.5rem;">
+                        <li>Review collected feedback with development team</li>
+                        <li>Prioritize improvements based on user input</li>
+                        <li>Refine agent designs and prompts</li>
+                        <li>Plan MVP implementation timeline</li>
+                        <li>Schedule follow-up validation sessions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="nav-buttons">
+                <button class="btn btn-secondary" onclick="previousSection('sentinel')">← Previous</button>
+                <button class="btn btn-primary" onclick="resetSession()">🔄 Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION: Update these values
+        // ==========================================
+        const CONFIG = {
+            // Option 1: Azure Functions API (configured for this deployment)
+            azureApiUrl: '/api/feedback', // Azure Static Web App API
+
+            // Option 2: Google Sheets (alternative)
+            // Instructions at bottom of file to set up
+            googleSheetsUrl: '', // Add your Google Apps Script web app URL here
+
+            // Option 3: Simple webhook (Formspree, Zapier, etc.)
+            webhookUrl: '', // Add webhook URL here
+
+            // Enable localStorage backup (always saves locally)
+            useLocalStorage: true,
+
+            // Auto-save interval (ms) - saves as user fills form
+            autoSaveInterval: 30000 // 30 seconds
+        };
+
+        // Feedback data storage
+        const feedbackData = {
+            sessionId: generateSessionId(),
+            userInfo: {
+                name: '',
+                email: '',
+                role: ''
+            },
+            discovery: {
+                ratings: {},
+                insights: [],
+                concerns: '',
+                improvements: ''
+            },
+            vision: {
+                ratings: {},
+                scenarios: [],
+                concerns: '',
+                improvements: ''
+            },
+            sentinel: {
+                ratings: {},
+                mentalModels: [],
+                concerns: '',
+                improvements: ''
+            },
+            timestamp: new Date().toISOString(),
+            lastSaved: null
+        };
+
+        function generateSessionId() {
+            return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // Star rating functionality
+        document.querySelectorAll('.rating-stars').forEach(group => {
+            const stars = group.querySelectorAll('.star');
+            const groupName = group.getAttribute('data-rating-group');
+
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const value = parseInt(this.getAttribute('data-value'));
+
+                    // Update visual state
+                    stars.forEach((s, index) => {
+                        if (index < value) {
+                            s.classList.add('active');
+                        } else {
+                            s.classList.remove('active');
+                        }
+                    });
+
+                    // Store rating
+                    const section = groupName.split('-')[0];
+                    const ratingType = groupName.split('-').slice(1).join('-');
+                    feedbackData[section].ratings[ratingType] = value;
+
+                    updateSummary();
+                });
+            });
+        });
+
+        // Checkbox functionality
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const name = this.getAttribute('name');
+                const value = this.getAttribute('value');
+                const currentSection = document.querySelector('.agent-section.active').id;
+
+                let targetArray;
+                if (name === 'insight-types') {
+                    targetArray = feedbackData.discovery.insights;
+                } else if (name === 'scenario-types') {
+                    targetArray = feedbackData.vision.scenarios;
+                } else if (name === 'mental-models') {
+                    targetArray = feedbackData.sentinel.mentalModels;
+                }
+
+                if (this.checked) {
+                    if (!targetArray.includes(value)) {
+                        targetArray.push(value);
+                    }
+                } else {
+                    const index = targetArray.indexOf(value);
+                    if (index > -1) {
+                        targetArray.splice(index, 1);
+                    }
+                }
+
+                updateSummary();
+            });
+        });
+
+        // Textarea functionality
+        ['discovery', 'vision', 'sentinel'].forEach(section => {
+            const concernsEl = document.getElementById(`${section}-concerns`);
+            const improvementsEl = document.getElementById(`${section}-improvements`);
+
+            if (concernsEl) {
+                concernsEl.addEventListener('input', function() {
+                    feedbackData[section].concerns = this.value;
+                    updateSummary();
+                });
+            }
+
+            if (improvementsEl) {
+                improvementsEl.addEventListener('input', function() {
+                    feedbackData[section].improvements = this.value;
+                    updateSummary();
+                });
+            }
+        });
+
+        // Navigation functions
+        function nextSection(sectionId) {
+            const currentSection = document.querySelector('.agent-section.active');
+            const nextSection = document.getElementById(sectionId);
+            const currentStep = document.querySelector('.progress-step.active');
+            const nextStep = document.querySelector(`.progress-step[data-section="${sectionId}"]`);
+
+            currentSection.classList.remove('active');
+            nextSection.classList.add('active');
+
+            currentStep.classList.remove('active');
+            currentStep.classList.add('completed');
+            nextStep.classList.add('active');
+
+            window.scrollTo(0, 0);
+            updateSummary();
+        }
+
+        function previousSection(sectionId) {
+            const currentSection = document.querySelector('.agent-section.active');
+            const prevSection = document.getElementById(sectionId);
+            const currentStep = document.querySelector('.progress-step.active');
+            const prevStep = document.querySelector(`.progress-step[data-section="${sectionId}"]`);
+
+            currentSection.classList.remove('active');
+            prevSection.classList.add('active');
+
+            currentStep.classList.remove('active');
+            currentStep.classList.remove('completed');
+            prevStep.classList.remove('completed');
+            prevStep.classList.add('active');
+
+            window.scrollTo(0, 0);
+        }
+
+        // Progress step click handlers
+        document.querySelectorAll('.progress-step').forEach(step => {
+            step.addEventListener('click', function() {
+                const sectionId = this.getAttribute('data-section');
+                const targetSection = document.getElementById(sectionId);
+                const currentSection = document.querySelector('.agent-section.active');
+                const currentStep = document.querySelector('.progress-step.active');
+
+                if (currentSection !== targetSection) {
+                    currentSection.classList.remove('active');
+                    targetSection.classList.add('active');
+
+                    currentStep.classList.remove('active');
+                    this.classList.add('active');
+
+                    window.scrollTo(0, 0);
+                }
+            });
+        });
+
+        // Update summary function
+        function updateSummary() {
+            const summaryEl = document.getElementById('feedbackSummary');
+            if (!summaryEl) return;
+
+            let html = '';
+
+            // Discovery feedback
+            html += '<div style="margin-bottom: 2rem;"><h4 style="color: var(--primary); margin-bottom: 1rem;">🔍 Discovery Agent</h4>';
+            if (Object.keys(feedbackData.discovery.ratings).length > 0) {
+                html += '<div><strong>Ratings:</strong><ul style="margin-left: 1.5rem; margin-top: 0.5rem;">';
+                for (const [key, value] of Object.entries(feedbackData.discovery.ratings)) {
+                    html += `<li>${key.replace('-', ' ')}: ${'★'.repeat(value)}${'☆'.repeat(5-value)}</li>`;
+                }
+                html += '</ul></div>';
+            }
+            if (feedbackData.discovery.insights.length > 0) {
+                html += `<div style="margin-top: 0.5rem;"><strong>Valuable Insights:</strong> ${feedbackData.discovery.insights.join(', ')}</div>`;
+            }
+            if (feedbackData.discovery.concerns) {
+                html += `<div style="margin-top: 0.5rem;"><strong>Concerns:</strong> ${feedbackData.discovery.concerns}</div>`;
+            }
+            if (feedbackData.discovery.improvements) {
+                html += `<div style="margin-top: 0.5rem;"><strong>Improvements:</strong> ${feedbackData.discovery.improvements}</div>`;
+            }
+            html += '</div>';
+
+            // Vision feedback
+            html += '<div style="margin-bottom: 2rem;"><h4 style="color: var(--primary); margin-bottom: 1rem;">🔮 Vision Agent</h4>';
+            if (Object.keys(feedbackData.vision.ratings).length > 0) {
+                html += '<div><strong>Ratings:</strong><ul style="margin-left: 1.5rem; margin-top: 0.5rem;">';
+                for (const [key, value] of Object.entries(feedbackData.vision.ratings)) {
+                    html += `<li>${key.replace('-', ' ')}: ${'★'.repeat(value)}${'☆'.repeat(5-value)}</li>`;
+                }
+                html += '</ul></div>';
+            }
+            if (feedbackData.vision.scenarios.length > 0) {
+                html += `<div style="margin-top: 0.5rem;"><strong>Compelling Scenarios:</strong> ${feedbackData.vision.scenarios.join(', ')}</div>`;
+            }
+            if (feedbackData.vision.concerns) {
+                html += `<div style="margin-top: 0.5rem;"><strong>Concerns:</strong> ${feedbackData.vision.concerns}</div>`;
+            }
+            if (feedbackData.vision.improvements) {
+                html += `<div style="margin-top: 0.5rem;"><strong>Improvements:</strong> ${feedbackData.vision.improvements}</div>`;
+            }
+            html += '</div>';
+
+            // Sentinel feedback
+            html += '<div style="margin-bottom: 2rem;"><h4 style="color: var(--primary); margin-bottom: 1rem;">🛡️ The Sentinel</h4>';
+            if (Object.keys(feedbackData.sentinel.ratings).length > 0) {
+                html += '<div><strong>Ratings:</strong><ul style="margin-left: 1.5rem; margin-top: 0.5rem;">';
+                for (const [key, value] of Object.entries(feedbackData.sentinel.ratings)) {
+                    html += `<li>${key.replace('-', ' ')}: ${'★'.repeat(value)}${'☆'.repeat(5-value)}</li>`;
+                }
+                html += '</ul></div>';
+            }
+            if (feedbackData.sentinel.mentalModels.length > 0) {
+                html += `<div style="margin-top: 0.5rem;"><strong>Valuable Mental Models:</strong> ${feedbackData.sentinel.mentalModels.join(', ')}</div>`;
+            }
+            if (feedbackData.sentinel.concerns) {
+                html += `<div style="margin-top: 0.5rem;"><strong>Concerns:</strong> ${feedbackData.sentinel.concerns}</div>`;
+            }
+            if (feedbackData.sentinel.improvements) {
+                html += `<div style="margin-top: 0.5rem;"><strong>Improvements:</strong> ${feedbackData.sentinel.improvements}</div>`;
+            }
+            html += '</div>';
+
+            summaryEl.innerHTML = html || '<p style="color: var(--text-secondary);">Complete the feedback forms above to see your summary here.</p>';
+        }
+
+        // Export functions
+        function exportFeedback(format) {
+            feedbackData.timestamp = new Date().toISOString();
+
+            if (format === 'json') {
+                const dataStr = JSON.stringify(feedbackData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `phoenix-agent-feedback-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+            } else if (format === 'text') {
+                let text = 'PROJECT PHOENIX - AGENT FEEDBACK SESSION\n';
+                text += '========================================\n\n';
+                text += `Date: ${new Date().toLocaleDateString()}\n\n`;
+
+                text += 'DISCOVERY AGENT\n';
+                text += '---------------\n';
+                text += `Ratings:\n`;
+                for (const [key, value] of Object.entries(feedbackData.discovery.ratings)) {
+                    text += `  ${key}: ${value}/5 stars\n`;
+                }
+                text += `\nValuable Insights: ${feedbackData.discovery.insights.join(', ')}\n`;
+                text += `\nConcerns: ${feedbackData.discovery.concerns}\n`;
+                text += `\nImprovements: ${feedbackData.discovery.improvements}\n\n`;
+
+                text += 'VISION AGENT\n';
+                text += '------------\n';
+                text += `Ratings:\n`;
+                for (const [key, value] of Object.entries(feedbackData.vision.ratings)) {
+                    text += `  ${key}: ${value}/5 stars\n`;
+                }
+                text += `\nCompelling Scenarios: ${feedbackData.vision.scenarios.join(', ')}\n`;
+                text += `\nConcerns: ${feedbackData.vision.concerns}\n`;
+                text += `\nImprovements: ${feedbackData.vision.improvements}\n\n`;
+
+                text += 'THE SENTINEL\n';
+                text += '------------\n';
+                text += `Ratings:\n`;
+                for (const [key, value] of Object.entries(feedbackData.sentinel.ratings)) {
+                    text += `  ${key}: ${value}/5 stars\n`;
+                }
+                text += `\nValuable Mental Models: ${feedbackData.sentinel.mentalModels.join(', ')}\n`;
+                text += `\nConcerns: ${feedbackData.sentinel.concerns}\n`;
+                text += `\nImprovements: ${feedbackData.sentinel.improvements}\n`;
+
+                const dataBlob = new Blob([text], {type: 'text/plain'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `phoenix-agent-feedback-${new Date().toISOString().split('T')[0]}.txt`;
+                link.click();
+            }
+        }
+
+        function copyToClipboard() {
+            const summaryEl = document.getElementById('feedbackSummary');
+            const text = summaryEl.innerText;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Feedback summary copied to clipboard!');
+            });
+        }
+
+        function resetSession() {
+            if (confirm('Are you sure you want to reset and start over? This will clear all feedback.')) {
+                location.reload();
+            }
+        }
+
+        // Initialize
+        updateSummary();
+
+        // ==========================================
+        // SIMULATION LOGIC
+        // ==========================================
+
+        // Discovery Agent Simulation
+        let discoveryStep = 0;
+        const discoveryConversation = [
+            {
+                type: 'agent',
+                text: "Let's start with the inception story. How did this company come to exist? What problem were you originally solving?",
+                signals: {}
+            },
+            {
+                type: 'user',
+                text: "We started helping lenders underwrite arborist reports for loans on properties with protected trees. The reports are complex technical documents, and we built expertise in extracting the key facts lenders need.",
+                signals: {}
+            },
+            {
+                type: 'agent',
+                text: "<em style='color: var(--accent);'>[Detecting strategic signal: Document intelligence + unique expertise]</em><br>Interesting. Who else does this, and why are you different or better?",
+                signals: {}
+            },
+            {
+                type: 'user',
+                text: "No one else does exactly this. We've built a proprietary methodology that achieves zero-default rates. Two other lenders have actually started paying us to use customized versions of our system.",
+                signals: { customers: 5, ip: 3 }
+            },
+            {
+                type: 'agent',
+                text: "<em style='color: var(--accent);'>[Signals detected: External customers = 5 points | Unique IP = 3 points]</em><br>Tell me more about those external customers. What drove them to seek out your system?",
+                signals: {}
+            },
+            {
+                type: 'user',
+                text: "They were struggling with the same problem we solved for ourselves - high default rates on tree-related loans. Our methodology was proven, so they wanted to license it.",
+                signals: {}
+            },
+            {
+                type: 'agent',
+                text: "<em style='color: var(--accent);'>[Market validation confirmed]</em><br>What's preventing you from scaling this to more cities or more lender customers?",
+                signals: {}
+            },
+            {
+                type: 'user',
+                text: "Our current process doesn't transfer well without expert staff. Each new market requires deep local knowledge, and we can't hire fast enough to scale.",
+                signals: { scale: 2 }
+            },
+            {
+                type: 'agent',
+                text: "<em style='color: var(--accent);'>[Signal detected: Scalability constraint = 2 points]</em><br>How does your leadership team feel about transforming the business model to address this scaling challenge?",
+                signals: {}
+            },
+            {
+                type: 'user',
+                text: "We're actively engaged in thinking about transformation. The CEO sees platform opportunity and is willing to invest.",
+                signals: { leadership: 1 }
+            },
+            {
+                type: 'agent',
+                text: "<em style='color: var(--accent);'>[Signal detected: Leadership appetite = 1 point | Total: 11/7 - Platform transformation recommended]</em><br><br>Excellent. I've captured comprehensive insights across business model, competitive landscape, and transformation readiness. Your signals strongly indicate platform transformation potential. Let me summarize what we've learned...",
+                signals: {}
+            }
+        ];
+
+        function startDiscoverySimulation() {
+            discoveryStep = 0;
+            document.getElementById('discoveryChat').innerHTML = '';
+            document.getElementById('discoverySignals').style.display = 'block';
+
+            // Reset signals
+            ['customers', 'ip', 'scale', 'leadership'].forEach(sig => {
+                document.getElementById(`signal-${sig}`).style.width = '0%';
+                document.getElementById(`signal-${sig}`).textContent = '';
+            });
+
+            playDiscoveryStep();
+        }
+
+        function resetDiscoverySimulation() {
+            discoveryStep = 0;
+            document.getElementById('discoveryChat').innerHTML = '<p style="color: var(--text-secondary); text-align: center; padding: 2rem;">Click "Start Interview" to see how the Discovery Agent conducts adaptive stakeholder interviews</p>';
+            document.getElementById('discoverySignals').style.display = 'none';
+            document.getElementById('discoveryTyping').classList.remove('active');
+        }
+
+        function playDiscoveryStep() {
+            if (discoveryStep >= discoveryConversation.length) return;
+
+            const step = discoveryConversation[discoveryStep];
+            const typing = document.getElementById('discoveryTyping');
+            const chat = document.getElementById('discoveryChat');
+
+            if (step.type === 'agent') {
+                typing.classList.add('active');
+                setTimeout(() => {
+                    typing.classList.remove('active');
+                    const msg = document.createElement('div');
+                    msg.className = 'chat-message agent';
+                    msg.innerHTML = `<strong>Discovery Agent:</strong> ${step.text}`;
+                    chat.appendChild(msg);
+                    chat.scrollTop = chat.scrollHeight;
+
+                    updateSignals(step.signals);
+                    discoveryStep++;
+                    setTimeout(playDiscoveryStep, 1500);
+                }, 1000);
+            } else {
+                setTimeout(() => {
+                    const msg = document.createElement('div');
+                    msg.className = 'chat-message user';
+                    msg.innerHTML = `<strong>Stakeholder:</strong> ${step.text}`;
+                    chat.appendChild(msg);
+                    chat.scrollTop = chat.scrollHeight;
+
+                    updateSignals(step.signals);
+                    discoveryStep++;
+                    setTimeout(playDiscoveryStep, 1500);
+                }, 800);
+            }
+        }
+
+        function updateSignals(signals) {
+            for (const [key, value] of Object.entries(signals)) {
+                const el = document.getElementById(`signal-${key}`);
+                setTimeout(() => {
+                    el.style.width = `${(value / 5) * 100}%`;
+                    el.textContent = `${value} pts`;
+                }, 300);
+            }
+        }
+
+        // Vision Agent Simulation
+        function startVisionSimulation() {
+            // Animate signal scoring
+            const scores = {customers: 5, ip: 3, scale: 2, leadership: 1};
+            let total = 0;
+            let delay = 0;
+
+            for (const [key, value] of Object.entries(scores)) {
+                setTimeout(() => {
+                    document.getElementById(`score-${key}`).textContent = `${value} points`;
+                    document.getElementById(`score-${key}`).style.color = 'var(--success)';
+                    total += value;
+                    document.getElementById('total-score').textContent = `${total} / 7 threshold`;
+
+                    if (total >= 7) {
+                        document.getElementById('total-score').style.color = 'var(--accent)';
+                        document.getElementById('recommendation').textContent = '✓ Strongly recommend platform transformation scenario';
+                        document.getElementById('recommendation').style.color = 'var(--success)';
+                    }
+                }, delay);
+                delay += 800;
+            }
+
+            // Show workspaces
+            setTimeout(() => {
+                document.getElementById('visionWorkspaces').style.display = 'grid';
+
+                // Animate workspace generation
+                setTimeout(() => activateWorkspace('efficiency', 'Generating efficiency scenario...'), 500);
+                setTimeout(() => activateWorkspace('platform', 'Generating platform scenario...'), 1500);
+                setTimeout(() => activateWorkspace('newbiz', 'Generating new business scenario...'), 2500);
+
+                setTimeout(() => completeWorkspace('efficiency', 'Efficiency scenario complete ✓'), 3500);
+                setTimeout(() => completeWorkspace('platform', 'Platform scenario complete ✓'), 4000);
+                setTimeout(() => completeWorkspace('newbiz', 'New business scenario complete ✓'), 4500);
+            }, delay + 500);
+        }
+
+        function activateWorkspace(id, status) {
+            const ws = document.getElementById(`workspace-${id}`);
+            ws.classList.add('active');
+            ws.querySelector('.workspace-status').textContent = status;
+            ws.querySelector('.workspace-status').classList.add('pulse');
+        }
+
+        function completeWorkspace(id, status) {
+            const ws = document.getElementById(`workspace-${id}`);
+            ws.querySelector('.workspace-status').textContent = status;
+            ws.querySelector('.workspace-status').classList.remove('pulse');
+            ws.querySelector('.workspace-status').style.color = 'var(--success)';
+        }
+
+        function resetVisionSimulation() {
+            document.getElementById('score-customers').textContent = '0 points';
+            document.getElementById('score-ip').textContent = '0 points';
+            document.getElementById('score-scale').textContent = '0 points';
+            document.getElementById('score-leadership').textContent = '0 points';
+            document.getElementById('total-score').textContent = '0 / 7 threshold';
+            document.getElementById('total-score').style.color = 'var(--text-secondary)';
+            document.getElementById('recommendation').textContent = 'Awaiting signal analysis...';
+            document.getElementById('recommendation').style.color = 'var(--text-secondary)';
+            document.getElementById('visionWorkspaces').style.display = 'none';
+
+            ['efficiency', 'platform', 'newbiz'].forEach(id => {
+                const ws = document.getElementById(`workspace-${id}`);
+                ws.classList.remove('active');
+                ws.querySelector('.workspace-status').textContent = 'Idle';
+                ws.querySelector('.workspace-status').style.color = '';
+            });
+        }
+
+        // Sentinel Agent Simulation
+        const sentinelCritiques = [
+            {
+                model: 'Inversion',
+                icon: '🔄',
+                title: 'How does this fail catastrophically?',
+                context: 'Discovery identified: "Two lenders already using Connect 1.x"',
+                critique: 'What if those two customers are satisfied with Connect 1.x and don\'t want to migrate? What if they\'re staying only because of personal relationships, not product quality? Invert the "market validation" signal: Could these be reluctant customers who\'d leave if given a better alternative?'
+            },
+            {
+                model: 'Incentive Analysis',
+                icon: '💰',
+                title: 'Show me the incentive, show me the outcome',
+                context: 'Vision proposed: "$2M-$5M platform revenue target"',
+                critique: 'Who gets rewarded if the platform succeeds? If Blueprint operating company leadership still gets compensated on loan volume, they have zero incentive to prioritize platform customers. Are we creating incentive misalignment? Will platform team be starved of resources because operating company is more profitable short-term?'
+            },
+            {
+                model: 'Circle of Competence',
+                icon: '🎯',
+                title: 'Is this within their capabilities?',
+                context: 'Vision proposed: "Multi-tenant SaaS architecture with 20+ customers"',
+                critique: 'Blueprint operates like a services company with bespoke workflows. Building a product company requires different DNA: standardized processes, customer success capabilities, sales/marketing expertise. Do they have anyone who\'s built SaaS before? Are we asking them to develop skills outside their circle of competence while still running the operating business?'
+            },
+            {
+                model: 'Anchoring Bias',
+                icon: '🧠',
+                title: 'Are we anchored on the first solution?',
+                context: 'Discovery surfaced: "15-30 min loan creation via manual re-entry"',
+                critique: 'We\'re anchored on "automate the manual process" but is the process itself necessary? Why do we need to create loans in a separate system at all? Could the entire workflow be redesigned so loan data flows automatically? Are we optimizing a step that shouldn\'t exist?'
+            }
+        ];
+
+        function startSentinelSimulation() {
+            const status = document.getElementById('sentinelStatus');
+            const container = document.getElementById('sentinelCritiques');
+
+            status.innerHTML = '<div class="pulse" style="color: var(--accent);">🛡️ Sentinel analyzing transformation scenarios...</div>';
+            container.innerHTML = '';
+
+            sentinelCritiques.forEach((critique, index) => {
+                setTimeout(() => {
+                    const item = document.createElement('div');
+                    item.className = 'critique-item';
+                    item.innerHTML = `
+                        <strong style="color: var(--accent); display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                            <span style="font-size: 1.5rem;">${critique.icon}</span>
+                            ${critique.model}: "${critique.title}"
+                        </strong>
+                        <div style="font-style: italic; color: var(--text-secondary); margin-bottom: 0.5rem; font-size: 0.9rem;">
+                            ${critique.context}
+                        </div>
+                        <div style="background: var(--bg-dark); padding: 1rem; border-radius: 4px; margin-top: 0.5rem;">
+                            <strong style="color: var(--danger);">Sentinel Critique:</strong><br>
+                            ${critique.critique}
+                        </div>
+                    `;
+                    container.appendChild(item);
+
+                    setTimeout(() => item.classList.add('visible'), 50);
+                }, index * 1500);
+            });
+
+            setTimeout(() => {
+                status.innerHTML = '<div style="color: var(--success);">✓ Sentinel analysis complete - 4 critical perspectives surfaced</div>';
+            }, sentinelCritiques.length * 1500 + 500);
+        }
+
+        function resetSentinelSimulation() {
+            document.getElementById('sentinelStatus').innerHTML = '<div style="padding: 1rem; text-align: center; color: var(--text-secondary);">Click "Run Analysis" to see The Sentinel review a transformation scenario</div>';
+            document.getElementById('sentinelCritiques').innerHTML = '';
+        }
+
+        // ==========================================
+        // DATA PERSISTENCE & SAVE FUNCTIONALITY
+        // ==========================================
+
+        // Track user info changes
+        ['userName', 'userEmail', 'userRole'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.addEventListener('input', function() {
+                    const key = id.replace('user', '').toLowerCase();
+                    feedbackData.userInfo[key] = this.value;
+                    saveToLocalStorage();
+                });
+            }
+        });
+
+        // Save to localStorage
+        function saveToLocalStorage() {
+            if (CONFIG.useLocalStorage) {
+                try {
+                    feedbackData.lastSaved = new Date().toISOString();
+                    localStorage.setItem('phoenixFeedback', JSON.stringify(feedbackData));
+                } catch (e) {
+                    console.error('Failed to save to localStorage:', e);
+                }
+            }
+        }
+
+        // Load from localStorage on page load
+        function loadFromLocalStorage() {
+            if (CONFIG.useLocalStorage) {
+                try {
+                    const saved = localStorage.getItem('phoenixFeedback');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        Object.assign(feedbackData, data);
+
+                        // Restore user info fields
+                        if (data.userInfo) {
+                            document.getElementById('userName').value = data.userInfo.name || '';
+                            document.getElementById('userEmail').value = data.userInfo.email || '';
+                            document.getElementById('userRole').value = data.userInfo.role || '';
+                        }
+
+                        console.log('Restored previous session data');
+                    }
+                } catch (e) {
+                    console.error('Failed to load from localStorage:', e);
+                }
+            }
+        }
+
+        // Save to Google Sheets
+        async function saveToGoogleSheets() {
+            if (!CONFIG.googleSheetsUrl) {
+                return { success: false, error: 'No Google Sheets URL configured' };
+            }
+
+            try {
+                const response = await fetch(CONFIG.googleSheetsUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(feedbackData)
+                });
+
+                return { success: true };
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Save to webhook (Formspree, Zapier, etc.)
+        async function saveToWebhook() {
+            if (!CONFIG.webhookUrl) {
+                return { success: false, error: 'No webhook URL configured' };
+            }
+
+            try {
+                const response = await fetch(CONFIG.webhookUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(feedbackData)
+                });
+
+                if (response.ok) {
+                    return { success: true };
+                } else {
+                    return { success: false, error: `HTTP ${response.status}` };
+                }
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Save to Azure Functions API
+        async function saveToAzure() {
+            if (!CONFIG.azureApiUrl) {
+                return { success: false, error: 'No Azure API URL configured' };
+            }
+
+            try {
+                const response = await fetch(CONFIG.azureApiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(feedbackData)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    return { success: true, data: result };
+                } else {
+                    const error = await response.text();
+                    return { success: false, error: `HTTP ${response.status}: ${error}` };
+                }
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Master save function
+        async function saveFeedback(showStatus = true) {
+            const statusEl = document.getElementById('saveStatus');
+
+            if (showStatus) {
+                statusEl.style.display = 'block';
+                statusEl.style.background = 'rgba(245, 158, 11, 0.2)';
+                statusEl.style.color = 'var(--accent)';
+                statusEl.textContent = '💾 Saving feedback...';
+            }
+
+            // Always save to localStorage
+            saveToLocalStorage();
+
+            let cloudSaveSuccess = false;
+            let cloudError = null;
+
+            // Try Azure API first
+            if (CONFIG.azureApiUrl) {
+                const result = await saveToAzure();
+                cloudSaveSuccess = result.success;
+                cloudError = result.error;
+            }
+            // Fallback to Google Sheets
+            else if (CONFIG.googleSheetsUrl) {
+                const result = await saveToGoogleSheets();
+                cloudSaveSuccess = result.success;
+                cloudError = result.error;
+            }
+            // Fallback to webhook
+            else if (CONFIG.webhookUrl) {
+                const result = await saveToWebhook();
+                cloudSaveSuccess = result.success;
+                cloudError = result.error;
+            }
+
+            if (showStatus) {
+                if (cloudSaveSuccess) {
+                    statusEl.style.background = 'rgba(16, 185, 129, 0.2)';
+                    statusEl.style.color = 'var(--success)';
+                    statusEl.textContent = '✓ Feedback saved to Azure successfully!';
+                } else if (CONFIG.azureApiUrl || CONFIG.googleSheetsUrl || CONFIG.webhookUrl) {
+                    statusEl.style.background = 'rgba(245, 158, 11, 0.2)';
+                    statusEl.style.color = 'var(--accent)';
+                    statusEl.textContent = `⚠️ Saved locally (cloud save failed: ${cloudError || 'unknown error'})`;
+                } else {
+                    statusEl.style.background = 'rgba(16, 185, 129, 0.2)';
+                    statusEl.style.color = 'var(--success)';
+                    statusEl.textContent = '✓ Feedback saved locally';
+                }
+
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 5000);
+            }
+
+            return cloudSaveSuccess;
+        }
+
+        // Auto-save functionality
+        let autoSaveTimer;
+        function startAutoSave() {
+            if (CONFIG.autoSaveInterval > 0) {
+                autoSaveTimer = setInterval(() => {
+                    saveFeedback(false); // Silent save
+                }, CONFIG.autoSaveInterval);
+            }
+        }
+
+        // Enhanced export functions with cloud save
+        async function exportFeedback(format) {
+            // Save to cloud before exporting
+            await saveFeedback(true);
+
+            feedbackData.timestamp = new Date().toISOString();
+
+            if (format === 'json') {
+                const dataStr = JSON.stringify(feedbackData, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `phoenix-feedback-${feedbackData.sessionId}.json`;
+                link.click();
+            } else if (format === 'text') {
+                let text = 'PROJECT PHOENIX - AGENT FEEDBACK SESSION\n';
+                text += '========================================\n\n';
+                text += `Session ID: ${feedbackData.sessionId}\n`;
+                text += `Date: ${new Date().toLocaleDateString()}\n`;
+                if (feedbackData.userInfo.name) text += `Name: ${feedbackData.userInfo.name}\n`;
+                if (feedbackData.userInfo.email) text += `Email: ${feedbackData.userInfo.email}\n`;
+                if (feedbackData.userInfo.role) text += `Role: ${feedbackData.userInfo.role}\n`;
+                text += '\n';
+
+                text += 'DISCOVERY AGENT\n';
+                text += '---------------\n';
+                text += `Ratings:\n`;
+                for (const [key, value] of Object.entries(feedbackData.discovery.ratings)) {
+                    text += `  ${key}: ${value}/5 stars\n`;
+                }
+                text += `\nValuable Insights: ${feedbackData.discovery.insights.join(', ')}\n`;
+                text += `\nConcerns: ${feedbackData.discovery.concerns}\n`;
+                text += `\nImprovements: ${feedbackData.discovery.improvements}\n\n`;
+
+                text += 'VISION AGENT\n';
+                text += '------------\n';
+                text += `Ratings:\n`;
+                for (const [key, value] of Object.entries(feedbackData.vision.ratings)) {
+                    text += `  ${key}: ${value}/5 stars\n`;
+                }
+                text += `\nCompelling Scenarios: ${feedbackData.vision.scenarios.join(', ')}\n`;
+                text += `\nConcerns: ${feedbackData.vision.concerns}\n`;
+                text += `\nImprovements: ${feedbackData.vision.improvements}\n\n`;
+
+                text += 'THE SENTINEL\n';
+                text += '------------\n';
+                text += `Ratings:\n`;
+                for (const [key, value] of Object.entries(feedbackData.sentinel.ratings)) {
+                    text += `  ${key}: ${value}/5 stars\n`;
+                }
+                text += `\nValuable Mental Models: ${feedbackData.sentinel.mentalModels.join(', ')}\n`;
+                text += `\nConcerns: ${feedbackData.sentinel.concerns}\n`;
+                text += `\nImprovements: ${feedbackData.sentinel.improvements}\n`;
+
+                const dataBlob = new Blob([text], {type: 'text/plain'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `phoenix-feedback-${feedbackData.sessionId}.txt`;
+                link.click();
+            }
+        }
+
+        // Initialize on page load
+        loadFromLocalStorage();
+        startAutoSave();
+
+        // Save when user leaves page
+        window.addEventListener('beforeunload', () => {
+            saveToLocalStorage();
+        });
+    </script>
+</body>
+</html>
+
+<!--
+==========================================
+GOOGLE SHEETS SETUP INSTRUCTIONS
+==========================================
+
+To collect feedback in Google Sheets (recommended for quick deployment):
+
+1. Create a new Google Sheet for storing feedback
+
+2. Go to Extensions > Apps Script
+
+3. Paste this code:
+
+function doPost(e) {
+  try {
+    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+    var data = JSON.parse(e.postData.contents);
+
+    // If this is first row, add headers
+    if (sheet.getLastRow() === 0) {
+      sheet.appendRow([
+        'Timestamp',
+        'Session ID',
+        'Name',
+        'Email',
+        'Role',
+        'Discovery Ratings',
+        'Discovery Insights',
+        'Discovery Concerns',
+        'Discovery Improvements',
+        'Vision Ratings',
+        'Vision Scenarios',
+        'Vision Concerns',
+        'Vision Improvements',
+        'Sentinel Ratings',
+        'Sentinel Mental Models',
+        'Sentinel Concerns',
+        'Sentinel Improvements'
+      ]);
+    }
+
+    // Add data row
+    sheet.appendRow([
+      new Date(data.timestamp),
+      data.sessionId,
+      data.userInfo.name,
+      data.userInfo.email,
+      data.userInfo.role,
+      JSON.stringify(data.discovery.ratings),
+      data.discovery.insights.join(', '),
+      data.discovery.concerns,
+      data.discovery.improvements,
+      JSON.stringify(data.vision.ratings),
+      data.vision.scenarios.join(', '),
+      data.vision.concerns,
+      data.vision.improvements,
+      JSON.stringify(data.sentinel.ratings),
+      data.sentinel.mentalModels.join(', '),
+      data.sentinel.concerns,
+      data.sentinel.improvements
+    ]);
+
+    return ContentService.createTextOutput(JSON.stringify({success: true}))
+      .setMimeType(ContentService.MimeType.JSON);
+
+  } catch(error) {
+    return ContentService.createTextOutput(JSON.stringify({success: false, error: error.toString()}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+4. Click "Deploy" > "New deployment"
+   - Type: Web app
+   - Execute as: Me
+   - Who has access: Anyone
+
+5. Click "Deploy" and copy the Web App URL
+
+6. Paste the URL into CONFIG.googleSheetsUrl at the top of this file
+
+7. Done! Feedback will now save to your Google Sheet
+
+==========================================
+ALTERNATIVE: FORMSPREE SETUP (Even Simpler)
+==========================================
+
+1. Go to https://formspree.io (free tier: 50 submissions/month)
+
+2. Create a new form
+
+3. Copy the form endpoint URL
+
+4. Paste into CONFIG.webhookUrl at the top of this file
+
+5. Feedback will be emailed to you as JSON
+
+==========================================
+DEPLOYING TO THE CLOUD
+==========================================
+
+Quick deployment options:
+
+1. GitHub Pages (Free, 2 minutes):
+   - Create a GitHub repo
+   - Upload this HTML file
+   - Enable GitHub Pages in repo settings
+   - Share the URL: https://yourname.github.io/repo-name/agent-feedback-session.html
+
+2. Netlify Drop (Free, 1 minute):
+   - Go to https://app.netlify.com/drop
+   - Drag this HTML file
+   - Get instant live URL
+
+3. Vercel (Free, 2 minutes):
+   - Install Vercel CLI: npm i -g vercel
+   - Run: vercel --prod
+   - Get instant live URL
+
+4. AWS S3 + CloudFront (More advanced):
+   - Upload to S3 bucket with public read
+   - Enable static website hosting
+   - Optional: Add CloudFront CDN
+
+==========================================
+-->
+</body>
+</html>
