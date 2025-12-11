@@ -1344,14 +1344,18 @@
         // CONFIGURATION: Update these values
         // ==========================================
         const CONFIG = {
-            // Option 1: Azure Functions API (configured for this deployment)
-            azureApiUrl: '/api/feedback', // Azure Static Web App API
+            // Option 1: Azure Blob Storage (configured for this deployment)
+            azureBlobUrl: 'https://phoenixfeedbackstore.blob.core.windows.net/feedback',
+            azureSasToken: 'se=2026-12-31T23%3A59%3A59Z&sp=racwdl&spr=https&sv=2022-11-02&sr=c&sig=1Csl/BmwpEkGKbfK99lymkKWSu4mBuImIKFbS636I5E%3D',
 
-            // Option 2: Google Sheets (alternative)
+            // Option 2: Azure Functions API (alternative if you deploy functions)
+            azureApiUrl: '', // Azure Static Web App API
+
+            // Option 3: Google Sheets (alternative)
             // Instructions at bottom of file to set up
             googleSheetsUrl: '', // Add your Google Apps Script web app URL here
 
-            // Option 3: Simple webhook (Formspree, Zapier, etc.)
+            // Option 4: Simple webhook (Formspree, Zapier, etc.)
             webhookUrl: '', // Add webhook URL here
 
             // Enable localStorage backup (always saves locally)
@@ -2046,8 +2050,38 @@
             }
         }
 
-        // Save to Azure Functions API
-        async function saveToAzure() {
+        // Save to Azure Blob Storage
+        async function saveToAzureBlob() {
+            if (!CONFIG.azureBlobUrl || !CONFIG.azureSasToken) {
+                return { success: false, error: 'No Azure Blob Storage configured' };
+            }
+
+            try {
+                const fileName = `${feedbackData.sessionId}.json`;
+                const blobUrl = `${CONFIG.azureBlobUrl}/${fileName}?${CONFIG.azureSasToken}`;
+
+                const response = await fetch(blobUrl, {
+                    method: 'PUT',
+                    headers: {
+                        'x-ms-blob-type': 'BlockBlob',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(feedbackData, null, 2)
+                });
+
+                if (response.ok || response.status === 201) {
+                    return { success: true, fileName };
+                } else {
+                    const error = await response.text();
+                    return { success: false, error: `HTTP ${response.status}: ${error}` };
+                }
+            } catch (error) {
+                return { success: false, error: error.message };
+            }
+        }
+
+        // Save to Azure Functions API (fallback)
+        async function saveToAzureApi() {
             if (!CONFIG.azureApiUrl) {
                 return { success: false, error: 'No Azure API URL configured' };
             }
@@ -2090,9 +2124,15 @@
             let cloudSaveSuccess = false;
             let cloudError = null;
 
-            // Try Azure API first
-            if (CONFIG.azureApiUrl) {
-                const result = await saveToAzure();
+            // Try Azure Blob Storage first
+            if (CONFIG.azureBlobUrl && CONFIG.azureSasToken) {
+                const result = await saveToAzureBlob();
+                cloudSaveSuccess = result.success;
+                cloudError = result.error;
+            }
+            // Try Azure API next
+            else if (CONFIG.azureApiUrl) {
+                const result = await saveToAzureApi();
                 cloudSaveSuccess = result.success;
                 cloudError = result.error;
             }
